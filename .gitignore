@@ -1,0 +1,23 @@
+# R specific
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Data files (if they're large)
+*.csv
+*.nc
+*.tif
+# (you might want to track smaller data files)
+
+# Output
+*.pdf
+*.png
+*.jpg
+figures/
+output/
+
+# System files
+.DS_Store
+Thumbs.db
