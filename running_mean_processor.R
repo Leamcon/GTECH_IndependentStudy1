@@ -59,8 +59,8 @@ observed_rm_range_grid <- running_mean_range_calculator(cpc_annual_means_ne_subs
 # now the same for the cmip6 model data (uses just modeled historical for now)
 modeled_rm_range_grid <- running_mean_range_calculator(cesm2_waccm_historical_annual_means_ne_subset, 
                                                        duration)
-modeled_rm_range_grid <- running_mean_range_calculator(cmcc_cm2_sr5_historical_annual_means_ne_subset, 
-                                                       duration)
+# modeled_rm_range_grid <- running_mean_range_calculator(cmcc_cm2_sr5_historical_annual_means_ne_subset, 
+#                                                        duration)
 # modeled_rm_range_grid <- running_mean_range_calculator(access_cm2_total_annual_array, 
 #                                                        duration)
 # modeled_rm_range_grid <- running_mean_range_calculator(access_cm2_historical_annual_means_ne_subset,
