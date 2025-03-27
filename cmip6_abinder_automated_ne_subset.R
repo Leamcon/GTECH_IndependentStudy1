@@ -3,10 +3,11 @@
 library(ncdf4)
 library(abind)
 library(sf)
-library(ggplot2)
+library(terra)
+library(tmap)
 
-# load the ggplot2 array visualization script
-source("array_ggplot_visualizer.R")
+# load the array visualization script
+source("multi_use_visualizer.R")
 
 #################
 # FUNCTIONS
@@ -23,6 +24,10 @@ climate_model_io <- function(models_df,
   
   # list to hold var names (mainly for status checking)
   all_var_names <- character()
+  
+  # status counter vars
+  processed_count <- 0
+  error_count <- 0
   
   # load the cpc array for masking
   load(file = "rdata/cpc_ne_annual_mean_precipitation.RData")
@@ -256,3 +261,6 @@ models_by_period <- expand.grid(
 )
 
 exec_func <- climate_model_io(models_by_period)
+
+# viz testing
+multi_use_visualizer(cmcc_cm2_sr5_historical_annual_means_ne_subset[,,45])

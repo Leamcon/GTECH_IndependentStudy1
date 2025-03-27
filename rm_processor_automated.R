@@ -1,18 +1,21 @@
 library(abind)
-library(ggplot2)
-library(gridExtra)
-library(sf)
+library(terra)
+library(jpeg)
 
 # User Specifications:
 # running mean window duration
 duration <- 10
 
 # visualizer
-source("rm_range_matrix_visualizer.R")
+source("multi_use_visualizer.R")
 
 #################
 # FUNCTIONS
 
+# Main IO Function
+#   - loads rdata file of modeled precip data
+#   - implements rm_range_diff_calc and grid arithmetic
+#   - outputs new vars
 cmip6_loader_processor <- function(observed_data, duration) {
   # load modeled data
   load("rdata/modeled_precipitation_ne_subset.RData", envir = .GlobalEnv)
@@ -117,90 +120,42 @@ grid_arithmetic_calculator <- function(observed_grid, model_grid) {
 
 # Plotting Function -- DOUBLE CHECK
 #   - creates plots for specific model & period
-create_model_plots <- function(results, model_name, period) {
-  # Get the relevant results
-  key <- paste(model_name, period, sep = "_")
+create_model_plots <- function(results) {
+  # grep to secure only model data, observed can be handled using $
+  model_keys <- names(results)[grepl("_rm_range$", names(results)) & !grepl("^observed", names(results))]
   
-  observed_grid <- results$observed
-  model_grid <- results[[paste0(key, "_rm_range")]]
-  difference_grid <- results[[paste0(key, "_difference")]]
-  bias_factor_grid <- results[[paste0(key, "_bias_factor")]]
+  # get the model names for use later
+  model_names <- gsub("_rm_range$", "", model_keys)
   
-  # Create plots
-  observed_rm_plot <- rm_range_matrix_visualizer(observed_grid,
-                                                 "Running Mean Range of Observed Annual Precipitation",
-                                                 "mm/day",
-                                                 "blue_white")
-  
-  model_title <- paste("Running Mean Range of Modeled Annual Precipitation", 
-                       "\nModel:", model_name, "Period:", period)
-  
-  modeled_rm_plot <- rm_range_matrix_visualizer(model_grid,
-                                                model_title,
-                                                "mm/day",
-                                                "blue_white")
-  
-  difference_rm_plot <- rm_range_matrix_visualizer(difference_grid,
-                                                   paste("Difference in Running Mean Ranges\nObserved -", model_name),
-                                                   "mm/day",
-                                                   "diff")
-  
-  factor_rm_plot <- rm_range_matrix_visualizer(bias_factor_grid,
-                                               paste("Model Bias Factor\n", model_name),
-                                               "Bias Factor",
-                                               "ratio")
-  
-  # Return the plots as a list
-  return(list(
-    observed = observed_rm_plot,
-    modeled = modeled_rm_plot,
-    difference = difference_rm_plot,
-    bias_factor = factor_rm_plot
-  ))
-}
-
-# Function to create a comparison plot of all models
-create_comparison_plot <- function(results) {
-  # Get all model keys (excluding observed and metric results)
-  model_keys <- names(results)[grepl("_rm_range$", names(results))]
-  
-  # Create a list to store plots
-  plots <- list()
-  
-  # Add observed plot first
-  plots[[1]] <- rm_range_matrix_visualizer(results$observed,
-                                           "Running Mean Range of Observed Annual Precipitation",
-                                           "mm/day",
-                                           "blue_white")
-  
-  # Create plots for each model
-  for (i in seq_along(model_keys)) {
-    model_key <- model_keys[i]
-    # Extract model name and period
-    parts <- strsplit(gsub("_rm_range$", "", model_key), "_")[[1]]
+  for (model_name in model_names) {
+    # extract the data for each 2x2 plot matrix
+    observed_data <- results$observed
+    model_rm_data <- results[[paste0(model_name, "_rm_range")]]
+    difference_data <- results[[paste0(model_name, "_difference")]]
+    bias_factor_data <- results[[paste0(model_name, "_bias_factor")]]
     
-    # Last part is the period
-    period <- parts[length(parts)]
-    # Everything before is the model name
-    model_name <- paste(parts[-length(parts)], collapse = "_")
+    # create dir
+    if (!dir.exists("figures/running_mean_figures")) {
+      dir.create("figures/running_mean_figures", recursive = TRUE)
+    }
     
-    # Create plot title
-    title <- paste0(model_name, " (", period, ")")
+    # set up the plot matrix
+    output_filename <- paste0("figures/running_mean_figures/", model_name, "_rm_range_diff_and_bias.jpg")
+    jpeg(output_filename, width = 10, height = 8, units = "in", res = 300)
+    par(mfrow = c(2, 2))
     
-    # Create plot and add to list
-    plots[[i + 1]] <- rm_range_matrix_visualizer(results[[model_key]],
-                                                 title,
-                                                 "mm/day",
-                                                 "blue_white")
+    
+    # apply the viz function
+    observed_plot <- multi_use_visualizer(observed_data, paste0("Observed RM Range (", duration, "-year window)"))
+    model_plot <- multi_use_visualizer(model_rm_data, paste0(model_name, " RM Range (", duration, "-year window)"))
+    diff_plot <- multi_use_visualizer(difference_data, paste0(model_name, " Difference from Observed"))
+    bias_plot <- multi_use_visualizer(bias_factor_data, paste0(model_name, " Bias Factor"))
+    
+    # clean up
+    par(mfrow = c(1, 1))
+    dev.off()
+    cat("Saved visualization for", model_name, "to", output_filename, "\n")
   }
-  
-  # Determine layout
-  n_plots <- length(plots)
-  n_cols <- min(3, n_plots)
-  n_rows <- ceiling(n_plots / n_cols)
-  
-  # Combine plots
-  return(do.call(grid.arrange, c(plots, ncol = n_cols)))
 }
 
 #################
@@ -209,3 +164,5 @@ create_comparison_plot <- function(results) {
 load("rdata/cpc_ne_annual_mean_precipitation.RData")
 
 results <- cmip6_loader_processor(cpc_annual_means_ne_subset, duration)
+
+create_model_plots(results)
