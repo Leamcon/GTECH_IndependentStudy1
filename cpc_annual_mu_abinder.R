@@ -6,7 +6,7 @@ library(abind)
 library(ggplot2)
 library(sf)
 
-source("array_ggplot_visualizer.R")
+#source("multi_use_visualizer.R")
 
 # function to aggregate monthly to annual means from a single .nc
 # creates an index of year values and month values
@@ -60,8 +60,8 @@ cpc_precipitation_aggregator <- function(nc_file_path) {
   
   # create names for array dims
   dimnames(annual_means) <- list(
-    longitude = as.character(round(lon, 2)),
-    latitude = as.character(round(lat, 2)),
+    longitude = as.character(lon, 2),
+    latitude = as.character(lat, 2),
     year = as.character(unique_years)
   )
   
@@ -81,7 +81,7 @@ cpc_precipitation_aggregator <- function(nc_file_path) {
 
 cpc_annual_means_ne_subset <- cpc_precipitation_aggregator("data/cpc_conus_precip/precip_mon_mean_ne_shp_subset.nc")
 
-array_ggplot_visualizer(cpc_annual_means_ne_subset, 45)
+#multi_use_visualizer(cpc_annual_means_ne_subset, 45)
 
 image(cpc_annual_means_ne_subset[,,45])
 

@@ -40,7 +40,7 @@ lat_cat2 <- c(42.125, 42.125, 42.125, 42.125, 42.125,
 
 observed_rm_diff_matrix <- running_mean_range_calculator(cpc_annual_means_ne_subset, 10)
 
-dims <- dimnames(input_matrix_rotated)
+dims <- dimnames(observed_rm_diff_matrix)
 
 lon_values <- as.numeric(dims[[1]])
 lat_values <- as.numeric(dims[[2]])
@@ -95,6 +95,6 @@ terra::plot(r,
             axes = TRUE)
 
 terra::lines(grat, col = "grey70", lwd = 0.5)
-points(basin_pts, col = "black", cex = 0.5)
+points(basin_pts, col = "black", cex = 1)
 terra::plot(basin_shp, col = NA, border = "red", lwd = 0.75, add = TRUE)
 terra::plot(ne_ny_shp, col = NA, border = "black", lwd = 0.75, add = TRUE)
