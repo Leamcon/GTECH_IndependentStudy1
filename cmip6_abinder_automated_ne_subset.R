@@ -164,8 +164,8 @@ precip_array_binder <- function(nc_file_list) {
   
   # create names for array dims
   dimnames(precipitation_array) <- list(
-    longitude = as.character(round(lon_values, 2)),
-    latitude = as.character(round(lat_values, 2)),
+    longitude = as.character(lon_values),
+    latitude = as.character(lat_values),
     year = as.character(years)
   )
   
@@ -255,8 +255,15 @@ array_masker <- function(target_array, masking_array) {
 
 # model name & period dataframe
 models_by_period <- expand.grid(
-  model = c("access_cm2", "access_esm1_5", "bcc_csm2_mr", "cesm2", "cesm2_waccm", "cmcc_cm2_sr5"),
-  period = c("historical", "ssp585"),
+  model = c("access_cm2", "access_esm1_5", "bcc_csm2_mr", "cesm2", "cesm2_waccm", "cmcc_cm2_sr5",
+            "cmcc_esm2", "cnrm_cm6_1","cnrm_esm2_1", "canesm5", "ec_earth3",
+            "ec_earth3_veg_lr","fgoals_g3", "gfdl_cm4","gfdl_esm4",
+            "giss_e2_1_g", "hadgem3_gc31_ll", "hadgem3_gc31_mm",
+            "iitm_esm", "inm_cm4_8", "inm_cm5_0", "ipsl_cm6a_lr",
+            "kace_1_0_g", "kiost_esm", "miroc_es2l", "miroc6",
+            "mpi_esm1_2_hr", "mpi_esm1_2_lr", "mri_esm2_0", "nesm3",
+            "noresm2_lm", "noresm2_mm", "taiesm1", "ukesm1_0_ll"),
+  period = c("historical"),
   stringsAsFactors = FALSE
 )
 

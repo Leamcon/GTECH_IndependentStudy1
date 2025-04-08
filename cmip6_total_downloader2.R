@@ -8,16 +8,17 @@ library(cmip6)
 library(sf)
 
 # calls my date continuity checker function
-source("gcm_date_continuity_checker.r")
+source("gcm_date_continuity_checker_2.r")
 
 # model lookup vector
 models <- c(
   #"ACCESS-CM2", "ACCESS-ESM1-5", "BCC-CSM2-MR", "CESM2", 
   #"CESM2-WACCM", "CMCC-CM2-SR5", 
-  #"CMCC-ESM2", "CNRM-CM6-1",
-  #"CNRM-ESM2-1", "CanESM5", "EC-Earth3", 
-  "EC-Earth3-Veg-LR",
-  "FGOALS-g3", "GFDL-CM4", "GFDL-CM4_gr2", "GFDL-ESM4",
+  #"CMCC-ESM2", "CNRM-CM6-1", "CNRM-ESM2-1",
+  #"CanESM5", "EC-Earth3", 
+  #"EC-Earth3-Veg-LR",
+  #"FGOALS-g3", "GFDL-CM4", 
+  "GFDL-CM4-gr2", "GFDL-ESM4",
   "GISS-E2-1-G", "HadGEM3-GC31-LL", "HadGEM3-GC31-MM",
   "IITM-ESM", "INM-CM4-8", "INM-CM5-0", "IPSL-CM6A-LR",
   "KACE-1-0-G", "KIOST-ESM", "MIROC-ES2L", "MIROC6",
@@ -27,6 +28,10 @@ models <- c(
 
 # scenario vector
 scenarios <- c("historical", "ssp585")
+
+# Create year lookup vectors
+historical_year_lookup <- 1950:2014
+ssp585_year_lookup <- 2015:2100
 
 # function convert model names to proper directory names
 # uses gsub to set dashes to underscores
@@ -58,26 +63,50 @@ downloader <- function(models, scenarios, area_of_interest) {
       
       cat(sprintf("\nProcessing model: %s, scenario: %s\n", model, scenario))
       
-      # wrapped the dl func in a try catch for error handling
-      tryCatch({
-        cmip6::cmip6_dl(
-          outdir = outdir,
-          aoi = area_of_interest,
-          models = model,
-          scenarios = scenario,
-          elements = "pr",
-          latest = TRUE
-        )
+      # Determine which year vector to use based on scenario
+      years_to_process <- if(scenario == "historical") {
+        cat("Using historical years (1950-2014)\n")
+        historical_year_lookup
+      } else {
+        cat("Using SSP585 years (2015-2100)\n")
+        ssp585_year_lookup
+      }
+      
+      total_years <- length(years_to_process)
+      
+      # Loop through each year in the appropriate lookup vector
+      for(i in seq_along(years_to_process)) {
+        year_val <- years_to_process[i]
+        cat(sprintf("\n  Processing year: %d (%d of %d)\n", year_val, i, total_years))
         
-        # check the time series is complete
-        print(gcm_date_continuity_checker(outdir))
+        # wrapped the dl func in a try catch for error handling
+        tryCatch({
+          cat(sprintf("  Starting download for %s - %s - Year %d...\n", 
+                      model, scenario, year_val))
+          
+          # Execute the cmip6_dl function for this specific year
+          cmip6::cmip6_dl(
+            outdir = outdir,
+            aoi = area_of_interest,
+            models = model,
+            scenarios = scenario,
+            elements = "pr",
+            year = year_val,
+            latest = TRUE
+          )
         
-        cat(sprintf("Download completed for %s - %s\n", model, scenario))
-        
-      }, error = function(e) {
-        cat(sprintf("Error downloading %s - %s: %s\n", 
-                    model, scenario, e$message))
-      })
+          cat(sprintf("  Download completed for %s - %s - Year %d\n", 
+                      model, scenario, year_val))
+          
+        }, error = function(e) {
+          cat(sprintf("  Error downloading %s - %s - Year %d: %s\n", 
+                      model, scenario, year_val, e$message))
+        })
+      }
+      
+      # Check the time series is complete after all years are downloaded
+      cat("\nVerifying data continuity for all downloaded years...\n")
+      print(gcm_date_continuity_checker_2(outdir))
       
       # prompt for continuation
       if (!prompt_continue()) {

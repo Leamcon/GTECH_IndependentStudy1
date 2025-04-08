@@ -20,10 +20,10 @@ cmip6_loader_processor <- function(observed_data, duration) {
   # load modeled data
   load("rdata/modeled_precipitation_ne_subset.RData", envir = .GlobalEnv)
   
-  # get list model 3D array vars
+  # grepl for only the historical model data
   all_vars <- ls(envir = .GlobalEnv)
-  model_vars <- all_vars[grepl("_annual_means_ne_subset$", all_vars)]
-  model_vars <- model_vars[!grepl("^cpc_", model_vars)]
+  historical_model_vars <- all_vars[grepl("_historical_", all_vars)]
+  historical_model_vars <- historical_model_vars[!grepl("^cpc_", historical_model_vars)]
   
   # inst empty list for results
   results <- list()
@@ -33,49 +33,38 @@ cmip6_loader_processor <- function(observed_data, duration) {
   lat_attr <- dimnames(observed_data)[[2]]
   
   # calc running mean range for observed data
-  observed_rm_range_grid <- running_mean_range_calculator(observed_data, duration)
+  observed_rm_range <- running_mean_range_calculator(observed_data, duration)
   
   # apply dimnames
-  dimnames(observed_rm_range_grid) <- list(longitude = lon_attr, latidude = lat_attr)
+  dimnames(observed_rm_range) <- list(longitude = lon_attr, latitude = lat_attr)
   
   # add observed data to results
-  results$observed <- observed_rm_range_grid
+  results$observed_rm_range <- observed_rm_range
   
   # process model data
-  for (model_var in model_vars) {
+  for (model_var in historical_model_vars) {
     # get model data
-    model_data <- get(model_var, envir = .GlobalEnv)
+    model_data <- get(model_var)
     
-    # extract model name and period inc. handling for multipart names
+    # extract model name
     name_parts <- strsplit(model_var, "_")[[1]]
-    model_name <- name_parts[1]
-    
-    if (name_parts[2] != "annual") {
-      model_name <- paste(model_name, name_parts[2], sep = "_")
-      period <- name_parts[3]
-    } else {
-      period <- name_parts[2]
-    }
-    
-    # period name cleanup
-    if (period == "annual") {
-      period <- name_parts[3]
-    }
+    noname_index <- match("historical", name_parts)
+    model_name <- paste(name_parts[1:noname_index - 1], collapse = "_")
     
     # calculate running mean range
     model_rm_range_grid <- running_mean_range_calculator(model_data, duration)
     
     # apply dimnames
-    dimnames(model_rm_range_grid) <- list(longitude = lon_attr, latidude = lat_attr)
+    dimnames(model_rm_range_grid) <- list(longitude = lon_attr, latitude = lat_attr)
     
     # perform grid arithmetic
-    comparison_metrics <- grid_arithmetic_calculator(observed_rm_range_grid, model_rm_range_grid)
+    comparison_metrics <- grid_arithmetic_calculator(observed_rm_range, model_rm_range_grid)
     
     # create new name for var and store
-    key <- paste(model_name, period, sep = "_")
-    results[[paste0(key, "_rm_range")]] <- model_rm_range_grid
-    results[[paste0(key, "_difference")]] <- comparison_metrics$difference
-    results[[paste0(key, "_bias_factor")]] <- comparison_metrics$bias_factor
+    key <- paste(model_name, "historical", sep = "_")
+    results[[paste(key, "rm_range", sep = "_")]] <- model_rm_range_grid
+    results[[paste(key, "difference", sep = "_")]] <- comparison_metrics$difference
+    results[[paste(key, "bias_factor", sep = "_")]] <- comparison_metrics$bias_factor
   }
   
   return(results)
@@ -97,7 +86,11 @@ running_mean_range_calculator <- function(ts_array, window) {
   # generate a matrix of range diffs across z axis at each x,y
   # TODO: prevent creation of inf values - see frei_read_cpc_dat
   range_matrix <- apply(running_mean_array, c(1,2), function(rm_slice) {
-    diff(range(rm_slice, na.rm = TRUE))
+    if(all(is.na(rm_slice))) {
+      return(NA)
+    } else {
+      return(diff(range(rm_slice, na.rm = TRUE)))
+    }
   })
   
   return(range_matrix)
@@ -121,18 +114,16 @@ grid_arithmetic_calculator <- function(observed_grid, model_grid) {
 # Plotting Function -- DOUBLE CHECK
 #   - creates plots for specific model & period
 create_model_plots <- function(results) {
-  # grep to secure only model data, observed can be handled using $
+  # create a vector of model names using grepl to get unique names
   model_keys <- names(results)[grepl("_rm_range$", names(results)) & !grepl("^observed", names(results))]
-  
-  # get the model names for use later
-  model_names <- gsub("_rm_range$", "", model_keys)
+  model_names <- gsub("_historical_rm_range$", "", model_keys) # gets only unique model names
   
   for (model_name in model_names) {
     # extract the data for each 2x2 plot matrix
-    observed_data <- results$observed
-    model_rm_data <- results[[paste0(model_name, "_rm_range")]]
-    difference_data <- results[[paste0(model_name, "_difference")]]
-    bias_factor_data <- results[[paste0(model_name, "_bias_factor")]]
+    observed_data <- results$observed_rm_range
+    model_rm_data <- results[[paste0(model_name, "_historical_rm_range")]]
+    difference_data <- results[[paste0(model_name, "_historical_difference")]]
+    bias_factor_data <- results[[paste0(model_name, "_historical_bias_factor")]]
     
     # create dir
     if (!dir.exists("figures/running_mean_figures")) {
@@ -140,21 +131,23 @@ create_model_plots <- function(results) {
     }
     
     # set up the plot matrix
-    output_filename <- paste0("figures/running_mean_figures/", model_name, "_rm_range_diff_and_bias.jpg")
+    output_filename <- paste("figures/running_mean_figures/", model_name, "_rm_range_diff_and_bias.jpg")
     jpeg(output_filename, width = 10, height = 8, units = "in", res = 300)
     par(mfrow = c(2, 2))
     
+    # generate a plot title
+    plot_title <- toupper(paste(strsplit(model_name, "_")[[1]], collapse = " "))
     
     # apply the viz function
     observed_plot <- multi_use_visualizer(observed_data, paste0("Observed RM Range (", duration, "-year window)"))
-    model_plot <- multi_use_visualizer(model_rm_data, paste0(model_name, " RM Range (", duration, "-year window)"))
-    diff_plot <- multi_use_visualizer(difference_data, paste0(model_name, " Difference from Observed"))
-    bias_plot <- multi_use_visualizer(bias_factor_data, paste0(model_name, " Bias Factor"))
+    model_plot <- multi_use_visualizer(model_rm_data, paste0(plot_title, " RM Range (", duration, "-year window)"))
+    diff_plot <- multi_use_visualizer(difference_data, paste0(plot_title, " Difference from Observed"))
+    bias_plot <- multi_use_visualizer(bias_factor_data, paste0(plot_title, " Bias Factor"))
     
     # clean up
     par(mfrow = c(1, 1))
     dev.off()
-    cat("Saved visualization for", model_name, "to", output_filename, "\n")
+      cat("Saved visualization for", model_name, "to", output_filename, "\n")
   }
 }
 
@@ -163,6 +156,6 @@ create_model_plots <- function(results) {
 
 load("rdata/cpc_ne_annual_mean_precipitation.RData")
 
-results <- cmip6_loader_processor(cpc_annual_means_ne_subset, duration)
+rm_derived_matrices <- cmip6_loader_processor(cpc_annual_means_ne_subset, duration)
 
-create_model_plots(results)
+create_model_plots(rm_derived_matrices)

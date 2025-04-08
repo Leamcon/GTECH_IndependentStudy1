@@ -60,8 +60,8 @@ cpc_precipitation_aggregator <- function(nc_file_path) {
   
   # create names for array dims
   dimnames(annual_means) <- list(
-    longitude = as.character(lon, 2),
-    latitude = as.character(lat, 2),
+    longitude = as.character(lon),
+    latitude = as.character(lat),
     year = as.character(unique_years)
   )
   
