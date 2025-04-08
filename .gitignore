@@ -9,6 +9,8 @@
 *.csv
 *.nc
 *.tif
+*.zip
+
 # shape specific ignores
 *.dbf
 *.prj
