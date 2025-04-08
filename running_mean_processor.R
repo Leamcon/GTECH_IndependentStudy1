@@ -5,6 +5,7 @@
 library(abind)
 library(ggplot2)
 library(gridExtra)
+library(sf)
 
 # User Specifications:
 # running mean window duration
@@ -35,6 +36,8 @@ running_mean_range_calculator <- function(ts_array, window) {
 }
 
 # load in the modeled and observed data
+load("rdata/cesm2_waccm_historical_annual_mean_precip.RData")
+load("rdata/cmcc_cm2_sr5_historical_annual_mean_precip.RData")
 load("rdata/access_cm2_historical_annual_mean_precip.RData")
 load("rdata/access_cm2_ssp585_annual_mean_precip.RData")
 load("rdata/cpc_ne_annual_mean_precipitation.RData")
@@ -54,10 +57,14 @@ observed_rm_range_grid <- running_mean_range_calculator(cpc_annual_means_ne_subs
                                                       duration)
 
 # now the same for the cmip6 model data (uses just modeled historical for now)
-#modeled_rm_range_grid <- running_mean_range_calculator(access_cm2_total_annual_array,
-                                                       #duration)
-modeled_rm_range_grid <- running_mean_range_calculator(access_cm2_historical_annual_means_ne_subset,
+modeled_rm_range_grid <- running_mean_range_calculator(cesm2_waccm_historical_annual_means_ne_subset, 
                                                        duration)
+# modeled_rm_range_grid <- running_mean_range_calculator(cmcc_cm2_sr5_historical_annual_means_ne_subset, 
+#                                                        duration)
+# modeled_rm_range_grid <- running_mean_range_calculator(access_cm2_total_annual_array, 
+#                                                        duration)
+# modeled_rm_range_grid <- running_mean_range_calculator(access_cm2_historical_annual_means_ne_subset,
+#                                                        duration)
 
 # apply dimnames to new matrices
 dimnames(observed_rm_range_grid) <- list(longitude = lon_attr, 

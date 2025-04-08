@@ -166,34 +166,54 @@ array_masker <- function(target_array, masking_array) {
 }
 
 # file list
-# TODO: add user prompting as in gcm downloader
-# TODO: add cpc file name handling
-nc_files_for_binding <- list.files("data/gcm_ne_subset/access_cm2/historical", full.names = TRUE)
-#nc_files_for_binding <- list.files("data/gcm_ne_subset/access_cm2/ssp585", full.names = TRUE)
+# TODO: add user prompting to control file ingestion as in gcm downloader
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/cmcc_cm2_sr5/historical", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/cmcc_cm2_sr5/ssp585", full.names = TRUE)
+nc_files_for_binding <- list.files("data/gcm_ne_subset/cesm2_waccm/historical", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/cesm2_waccm/ssp585", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/cesm2/historical", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/cesm2/ssp585", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/bcc_csm2_mr/historical", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/bcc_csm2_mr/ssp585", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/access_esm1_5/historical", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/access_esm1_5/ssp585", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/access_cm2/historical", full.names = TRUE)
+# nc_files_for_binding <- list.files("data/gcm_ne_subset/access_cm2/ssp585", full.names = TRUE)
 
 # wrapped execution in try to print some extra info
 try({
-  access_cm2_historical_annual_means_ne_subset <- precip_array_binder(nc_files_for_binding)
-  #access_cm2_ssp585_annual_means_ne_subset <- precip_array_binder(nc_files_for_binding)
-  #cat("Array creation successful!\n")
-  #cat("Dimensions:", paste(dim(access_cm2_ssp585_annual_means_ne_subset), collapse=" x "), "\n")
-  #cat("Timescale:", attr(access_cm2_ssp585_annual_means_ne_subset, "years"), "\n")
-  #cat("Units:", attr(access_cm2_ssp585_annual_means_ne_subset, "units"), "\n")
+  # cmcc_cm2_sr5_historical_annual_means_ne_subset <- precip_array_binder(nc_files_for_binding)
+  cesm2_waccm_historical_annual_means_ne_subset <- precip_array_binder(nc_files_for_binding)
+  # access_cm2_historical_annual_means_ne_subset <- precip_array_binder(nc_files_for_binding)
+  # access_cm2_ssp585_annual_means_ne_subset <- precip_array_binder(nc_files_for_binding)
+  # cat("Array creation successful!\n")
+  # cat("Dimensions:", paste(dim(access_cm2_ssp585_annual_means_ne_subset), collapse=" x "), "\n")
+  # cat("Timescale:", attr(access_cm2_ssp585_annual_means_ne_subset, "years"), "\n")
+  # cat("Units:", attr(access_cm2_ssp585_annual_means_ne_subset, "units"), "\n")
 })
 
 # load the cpc array for masking
 load(file = "rdata/cpc_ne_annual_mean_precipitation.RData")
 
-access_cm2_historical_annual_means_ne_subset <- axes_trimmer(access_cm2_historical_annual_means_ne_subset)
-#access_cm2_ssp585_annual_means_ne_subset <- axes_trimmer(access_cm2_ssp585_annual_means_ne_subset)
+# cmcc_cm2_sr5_historical_annual_means_ne_subset <- axes_trimmer(cmcc_cm2_sr5_historical_annual_means_ne_subset)
+cesm2_waccm_historical_annual_means_ne_subset <- axes_trimmer(cesm2_waccm_historical_annual_means_ne_subset)
+# access_cm2_historical_annual_means_ne_subset <- axes_trimmer(access_cm2_historical_annual_means_ne_subset)
+# access_cm2_ssp585_annual_means_ne_subset <- axes_trimmer(access_cm2_ssp585_annual_means_ne_subset)
 
 # masking, make sure to load cpc data FIRST
-access_cm2_historical_annual_means_ne_subset <- array_masker(access_cm2_historical_annual_means_ne_subset, cpc_annual_means_ne_subset)
-#access_cm2_ssp585_annual_means_ne_subset <- array_masker(access_cm2_ssp585_annual_means_ne_subset, cpc_annual_means_ne_subset)
+# cmcc_cm2_sr5_historical_annual_means_ne_subset <- array_masker(cmcc_cm2_sr5_historical_annual_means_ne_subset, cpc_annual_means_ne_subset)
+cesm2_waccm_historical_annual_means_ne_subset <- array_masker(cesm2_waccm_historical_annual_means_ne_subset, cpc_annual_means_ne_subset)
+# access_cm2_historical_annual_means_ne_subset <- array_masker(access_cm2_historical_annual_means_ne_subset, cpc_annual_means_ne_subset)
+# access_cm2_ssp585_annual_means_ne_subset <- array_masker(access_cm2_ssp585_annual_means_ne_subset, cpc_annual_means_ne_subset)
 
 # visualizer, set the second argument to the t index you would like visualized
-array_ggplot_visualizer(access_cm2_historical_annual_means_ne_subset, 45)
-#array_ggplot_visualizer(access_cm2_ssp585_annual_means_ne_subset, 45)
+# array_ggplot_visualizer(cmcc_cm2_sr5_historical_annual_means_ne_subset, 45)
+array_ggplot_visualizer(cesm2_waccm_historical_annual_means_ne_subset, 45)
+# array_ggplot_visualizer(access_cm2_historical_annual_means_ne_subset, 45)
+# array_ggplot_visualizer(access_cm2_ssp585_annual_means_ne_subset, 45)
 
+# saving
+save(cmcc_cm2_sr5_historical_annual_means_ne_subset, file = "rdata/cmcc_cm2_sr5_historical_annual_mean_precip.RData")
+save(cesm2_waccm_historical_annual_means_ne_subset, file = "rdata/cesm2_waccm_historical_annual_mean_precip.RData")
 save(access_cm2_historical_annual_means_ne_subset, file = "rdata/access_cm2_historical_annual_mean_precip.RData")
 save(access_cm2_ssp585_annual_means_ne_subset, file = "rdata/access_cm2_ssp585_annual_mean_precip.RData")

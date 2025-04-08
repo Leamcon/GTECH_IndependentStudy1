@@ -1,14 +1,25 @@
 # R specific
-.Rproj.user/
-.Rhistory
-.RData
-.Ruserdata
+*.Rproj.user/
+*.Rhistory
+*.RData
+*.Ruserdata
 *.Rproj
 
 # Data files (if they're large)
 *.csv
 *.nc
 *.tif
+*.zip
+
+# shape specific ignores
+*.dbf
+*.prj
+*.sbn
+*.sbx
+*.shp
+*.shp.xml
+*.shx
+*.doc
 # (you might want to track smaller data files)
 
 # Output
@@ -17,6 +28,13 @@
 *.jpg
 figures/
 output/
+data/
+rdata/
+
+# Dr. Frei's Work
+frei_catskills_validation_methods/
+frei_grid_plotting_methods/
+frei_mpvbc_methods/
 
 # System files
 .DS_Store
