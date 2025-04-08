@@ -62,3 +62,21 @@ terra::plot(r,
             axes = TRUE)                    
 
 
+
+# testing a tmap arrange 
+
+library(terra)
+library(tmap)
+library(gridExtra)
+
+r1 <- rast(nrows=10, ncols=10, vals=runif(100))
+r2 <- rast(nrows=10, ncols=10, vals=runif(100))
+r3 <- rast(nrows=10, ncols=10, vals=runif(100))
+r4 <- rast(nrows=10, ncols=10, vals=runif(100))
+
+tm1 <- tm_shape(r1) + tm_raster() + tm_layout(title="Plot 1")
+tm2 <- tm_shape(r2) + tm_raster() + tm_layout(title="Plot 2")
+tm3 <- tm_shape(r3) + tm_raster() + tm_layout(title="Plot 3")
+tm4 <- tm_shape(r4) + tm_raster() + tm_layout(title="Plot 4")
+
+tmap_arrange(tm1, tm2, tm3, tm4, ncol=2)

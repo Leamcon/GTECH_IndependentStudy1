@@ -11,6 +11,9 @@
 *.tif
 *.zip
 
+<<<<<<< HEAD
+=======
+>>>>>>> process_automation_experiment
 # shape specific ignores
 *.dbf
 *.prj

@@ -14,8 +14,9 @@ source("gcm_date_continuity_checker.r")
 models <- c(
   #"ACCESS-CM2", "ACCESS-ESM1-5", "BCC-CSM2-MR", "CESM2", 
   #"CESM2-WACCM", "CMCC-CM2-SR5", 
-  "CMCC-ESM2", "CNRM-CM6-1",
-  "CNRM-ESM2-1", "CanESM5", "EC-Earth3", "EC-Earth3-Veg-LR",
+  #"CMCC-ESM2", "CNRM-CM6-1",
+  #"CNRM-ESM2-1", "CanESM5", "EC-Earth3", 
+  "EC-Earth3-Veg-LR",
   "FGOALS-g3", "GFDL-CM4", "GFDL-CM4_gr2", "GFDL-ESM4",
   "GISS-E2-1-G", "HadGEM3-GC31-LL", "HadGEM3-GC31-MM",
   "IITM-ESM", "INM-CM4-8", "INM-CM5-0", "IPSL-CM6A-LR",
