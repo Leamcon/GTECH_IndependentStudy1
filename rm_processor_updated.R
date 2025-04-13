@@ -7,7 +7,7 @@ library(jpeg)
 duration <- 10
 
 # visualizer
-source("multi_use_visualizer.R")
+source("comparative_visualizer.R")
 
 #################
 # FUNCTIONS
@@ -100,7 +100,7 @@ running_mean_range_calculator <- function(ts_array, window) {
 #   - takes rmr diff grids for observed values and model values
 #   - returns comparisons for difference and bias factor
 grid_arithmetic_calculator <- function(observed_grid, model_grid) {
-
+  
   difference_grid <- (observed_grid - model_grid) / observed_grid
   bias_factor_grid <- observed_grid / model_grid
   
@@ -111,12 +111,24 @@ grid_arithmetic_calculator <- function(observed_grid, model_grid) {
   ))
 }
 
-# Plotting Function -- DOUBLE CHECK
+# Plotting Function -- Updated to ensure consistent legend for RM range plots
 #   - creates plots for specific model & period
+#   - ensures observed and model RM range plots use the same legend scale
 create_model_plots <- function(results) {
   # create a vector of model names using grepl to get unique names
   model_keys <- names(results)[grepl("_rm_range$", names(results)) & !grepl("^observed", names(results))]
   model_names <- gsub("_historical_rm_range$", "", model_keys) # gets only unique model names
+  
+  # Get the global min and max for ALL RM range values (observed and all models)
+  # This will ensure all RM range plots across ALL models use the same scale
+  all_rm_ranges <- list(results$observed_rm_range)
+  for (model_name in model_names) {
+    all_rm_ranges[[length(all_rm_ranges) + 1]] <- results[[paste0(model_name, "_historical_rm_range")]]
+  }
+  
+  # Calculate global min and max across all RM range matrices
+  global_min <- min(sapply(all_rm_ranges, function(x) min(x, na.rm = TRUE)), na.rm = TRUE)
+  global_max <- max(sapply(all_rm_ranges, function(x) max(x, na.rm = TRUE)), na.rm = TRUE)
   
   for (model_name in model_names) {
     # extract the data for each 2x2 plot matrix
@@ -126,28 +138,48 @@ create_model_plots <- function(results) {
     bias_factor_data <- results[[paste0(model_name, "_historical_bias_factor")]]
     
     # create dir
-    if (!dir.exists("figures/running_mean_figures")) {
-      dir.create("figures/running_mean_figures", recursive = TRUE)
+    if (!dir.exists("figures/updated_running_mean_figures")) {
+      dir.create("figures/updated_running_mean_figures", recursive = TRUE)
     }
     
     # set up the plot matrix
-    output_filename <- paste("figures/running_mean_figures/", model_name, "_rm_range_diff_and_bias.jpg")
+    output_filename <- paste("figures/updated_running_mean_figures/", model_name, "_rm_range_diff_and_bias.jpg", sep = "")
     jpeg(output_filename, width = 10, height = 8, units = "in", res = 300)
     par(mfrow = c(2, 2))
     
     # generate a plot title
     plot_title <- toupper(paste(strsplit(model_name, "_")[[1]], collapse = " "))
     
-    # apply the viz function
-    observed_plot <- multi_use_visualizer(observed_data, paste0("Observed RM Range (", duration, "-year window)"))
-    model_plot <- multi_use_visualizer(model_rm_data, paste0(plot_title, " RM Range (", duration, "-year window)"))
-    diff_plot <- multi_use_visualizer(difference_data, paste0(plot_title, " Difference from Observed"))
-    bias_plot <- multi_use_visualizer(bias_factor_data, paste0(plot_title, " Bias Factor"))
+    # apply the viz function with consistent min/max values for RM range plots
+    observed_plot <- comparative_visualizer(
+      observed_data, 
+      paste0("Observed RM Range (", duration, "-year window)"),
+      min_val = global_min,
+      max_val = global_max
+    )
+    
+    model_plot <- comparative_visualizer(
+      model_rm_data, 
+      paste0(plot_title, " RM Range (", duration, "-year window)"),
+      min_val = global_min,
+      max_val = global_max
+    )
+    
+    # For difference and bias plots, use default legends as they represent different metrics
+    diff_plot <- comparative_visualizer(
+      difference_data, 
+      paste0(plot_title, " Difference from Observed")
+    )
+    
+    bias_plot <- comparative_visualizer(
+      bias_factor_data, 
+      paste0(plot_title, " Bias Factor")
+    )
     
     # clean up
     par(mfrow = c(1, 1))
     dev.off()
-      cat("Saved visualization for", model_name, "to", output_filename, "\n")
+    cat("Saved visualization for", model_name, "to", output_filename, "\n")
   }
 }
 

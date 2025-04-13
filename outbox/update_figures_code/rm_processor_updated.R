@@ -7,7 +7,7 @@ library(jpeg)
 duration <- 10
 
 # visualizer
-source("multi_use_visualizer.R")
+source("comparative_visualizer.R")
 
 #################
 # FUNCTIONS
@@ -100,7 +100,7 @@ running_mean_range_calculator <- function(ts_array, window) {
 #   - takes rmr diff grids for observed values and model values
 #   - returns comparisons for difference and bias factor
 grid_arithmetic_calculator <- function(observed_grid, model_grid) {
-
+  
   difference_grid <- (observed_grid - model_grid) / observed_grid
   bias_factor_grid <- observed_grid / model_grid
   
@@ -111,12 +111,39 @@ grid_arithmetic_calculator <- function(observed_grid, model_grid) {
   ))
 }
 
-# Plotting Function -- DOUBLE CHECK
+# Plotting Function -- Updated to ensure consistent legend for RM range plots
 #   - creates plots for specific model & period
+#   - ensures observed and model RM range plots use the same legend scale
 create_model_plots <- function(results) {
   # create a vector of model names using grepl to get unique names
   model_keys <- names(results)[grepl("_rm_range$", names(results)) & !grepl("^observed", names(results))]
   model_names <- gsub("_historical_rm_range$", "", model_keys) # gets only unique model names
+  
+  # Get all RM range matrices for global min/max calculation
+  all_rm_ranges <- list()
+  all_rm_ranges[[1]] <- results$observed_rm_range
+  
+  for (model_name in model_names) {
+    all_rm_ranges[[length(all_rm_ranges) + 1]] <- results[[paste0(model_name, "_historical_rm_range")]]
+  }
+  
+  # Calculate global min and max with extra care to avoid missing extreme values
+  # First flatten all matrices to ensure we don't miss any values
+  all_values <- unlist(all_rm_ranges)
+  
+  # Remove NA, NaN, and Inf values before calculating min/max
+  all_values <- all_values[is.finite(all_values)]
+  
+  # Calculate global min and max
+  global_min <- min(all_values, na.rm = TRUE)
+  global_max <- max(all_values, na.rm = TRUE)
+  
+  # Add a small buffer to ensure max values are included in the range (prevents white cells)
+  global_max <- global_max * 1.01  # Add 1% buffer to the max value
+  
+  # Print the min/max values for debugging
+  cat("Global min value for RM range plots:", global_min, "\n")
+  cat("Global max value for RM range plots:", global_max, "\n")
   
   for (model_name in model_names) {
     # extract the data for each 2x2 plot matrix
@@ -125,29 +152,54 @@ create_model_plots <- function(results) {
     difference_data <- results[[paste0(model_name, "_historical_difference")]]
     bias_factor_data <- results[[paste0(model_name, "_historical_bias_factor")]]
     
+    # Debug: Print max value in observed data for this model comparison
+    obs_max <- max(observed_data, na.rm = TRUE)
+    model_max <- max(model_rm_data, na.rm = TRUE)
+    cat(model_name, "- Observed max:", obs_max, "Model max:", model_max, "\n")
+    
     # create dir
-    if (!dir.exists("figures/running_mean_figures")) {
-      dir.create("figures/running_mean_figures", recursive = TRUE)
+    if (!dir.exists("figures/updated_running_mean_figures")) {
+      dir.create("figures/updated_running_mean_figures", recursive = TRUE)
     }
     
     # set up the plot matrix
-    output_filename <- paste("figures/running_mean_figures/", model_name, "_rm_range_diff_and_bias.jpg")
+    output_filename <- paste("figures/updated_running_mean_figures/", model_name, "_rm_range_diff_and_bias.jpg", sep = "")
     jpeg(output_filename, width = 10, height = 8, units = "in", res = 300)
     par(mfrow = c(2, 2))
     
     # generate a plot title
     plot_title <- toupper(paste(strsplit(model_name, "_")[[1]], collapse = " "))
     
-    # apply the viz function
-    observed_plot <- multi_use_visualizer(observed_data, paste0("Observed RM Range (", duration, "-year window)"))
-    model_plot <- multi_use_visualizer(model_rm_data, paste0(plot_title, " RM Range (", duration, "-year window)"))
-    diff_plot <- multi_use_visualizer(difference_data, paste0(plot_title, " Difference from Observed"))
-    bias_plot <- multi_use_visualizer(bias_factor_data, paste0(plot_title, " Bias Factor"))
+    # apply the viz function with consistent min/max values for RM range plots
+    observed_plot <- multi_use_visualizer(
+      observed_data, 
+      paste0("Observed RM Range (", duration, "-year window)"),
+      min_val = global_min,
+      max_val = global_max
+    )
+    
+    model_plot <- multi_use_visualizer(
+      model_rm_data, 
+      paste0(plot_title, " RM Range (", duration, "-year window)"),
+      min_val = global_min,
+      max_val = global_max
+    )
+    
+    # For difference and bias plots, use default legends as they represent different metrics
+    diff_plot <- multi_use_visualizer(
+      difference_data, 
+      paste0(plot_title, " Difference from Observed")
+    )
+    
+    bias_plot <- multi_use_visualizer(
+      bias_factor_data, 
+      paste0(plot_title, " Bias Factor")
+    )
     
     # clean up
     par(mfrow = c(1, 1))
     dev.off()
-      cat("Saved visualization for", model_name, "to", output_filename, "\n")
+    cat("Saved visualization for", model_name, "to", output_filename, "\n")
   }
 }
 
