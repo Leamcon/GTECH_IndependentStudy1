@@ -1,13 +1,15 @@
 library(terra)
 
-#' Running Mean Range Visualizer
+#' Aggregate Plot Visualizer
 #' 
-#' @description Visualizes running mean range matrices with consistent color scales
+#' @description Visualizes mean precipitation matrices with consistent color scales
 #' @param input_matrix Matrix to visualize
-#' @param title Plot title
+#' @param title Plot title (defaults to "Mean Annual Precipitation")
 #' @param min_max_range Optional fixed range for color scale to ensure consistency
 #' @return The plot object (invisibly)
-rm_range_visualizer <- function(input_matrix, title = "Running Mean Range", min_max_range = NULL){
+aggregate_plot_visualizer <- function(input_matrix, 
+                                      title = "Mean Annual Precipitation", 
+                                      min_max_range = NULL) {
   
   # Extract dimension names
   dims <- dimnames(input_matrix)
@@ -85,8 +87,8 @@ rm_range_visualizer <- function(input_matrix, title = "Running Mean Range", min_
   terra::lines(grat, col = "grey70", lwd = 0.5)
   
   # Overlay shapes
-  terra::plot(basin_shp, col = NA, border = "black", lwd = 0.5, add = TRUE)
-  terra::plot(ne_ny_shp, col = NA, border = "grey70", lwd = 1.5, add = TRUE)
+  terra::plot(basin_shp, col = NA, border = "red", lwd = 0.5, add = TRUE)
+  terra::plot(ne_ny_shp, col = NA, border = "black", lwd = 1.5, add = TRUE)
   
   # Return invisibly
   invisible(r)

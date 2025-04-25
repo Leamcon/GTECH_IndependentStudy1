@@ -57,7 +57,7 @@ difference_visualizer <- function(input_matrix, title = "Difference (Observed - 
   )
   
   # Range for bias factor
-  range_vals <- c(-1.3, 0.9)
+  range_vals <- c(-0.9, 1.3)
   
   # Calculate where zero falls in the range (as a proportion)
   zero_position <- abs(range_vals[1]) / (abs(range_vals[1]) + abs(range_vals[2]))
@@ -86,8 +86,8 @@ difference_visualizer <- function(input_matrix, title = "Difference (Observed - 
   terra::lines(grat, col = "grey70", lwd = 0.5)
   
   # Overlay shapes
-  terra::plot(basin_shp, col = NA, border = "black", lwd = 1.5, add = TRUE)
-  terra::plot(ne_ny_shp, col = NA, border = "grey40", lwd = 1.5, add = TRUE)
+  terra::plot(basin_shp, col = NA, border = "black", lwd = 0.5, add = TRUE)
+  terra::plot(ne_ny_shp, col = NA, border = "grey70", lwd = 1.5, add = TRUE)
   
   # Return invisibly
   invisible(r)

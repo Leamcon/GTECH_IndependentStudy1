@@ -103,7 +103,7 @@ running_mean_range_calculator <- function(ts_array, window) {
 #   - returns comparisons for difference and bias factor
 grid_arithmetic_calculator <- function(observed_grid, model_grid) {
 
-  difference_grid <- (observed_grid - model_grid) / observed_grid
+  difference_grid <- (model_grid - observed_grid) / observed_grid
   bias_factor_grid <- observed_grid / model_grid
   
   # Return both metrics as a list
@@ -186,11 +186,26 @@ create_model_plots <- function(results) {
   }
 }
 
-#################
+
 # MAIN EXECUTION
 
 load("rdata/cpc_ne_annual_mean_precipitation.RData")
 
 rm_derived_matrices <- cmip6_loader_processor(cpc_annual_means_ne_subset, duration)
+
+#################
+# VALIDATION (uncomment when needed)
+# check ranges across similar grids for use in viz standardization
+# difference_keys <- names(rm_derived_matrices)[grepl("_difference$", names(rm_derived_matrices))]
+# difference_matrices <- rm_derived_matrices[difference_keys]
+# bias_factor_keys <- names(rm_derived_matrices)[grepl("_bias_factor$", names(rm_derived_matrices))]
+# bias_factor_matrices <- rm_derived_matrices[bias_factor_keys]
+# # diff min/max
+# diff_min <- min(unlist(lapply(difference_matrices, min, na.rm = T)), na.rm = T)
+# diff_max <- max(unlist(lapply(difference_matrices, max, na.rm = T)), na.rm = T)
+# 
+# # bias min/max
+# bias_min <- min(unlist(lapply(bias_factor_matrices, min, na.rm = T)), na.rm = T)
+# bias_max <- max(unlist(lapply(bias_factor_matrices, max, na.rm = T)), na.rm = T)
 
 create_model_plots(rm_derived_matrices)

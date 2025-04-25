@@ -70,8 +70,8 @@ bias_factor_visualizer <- function(input_matrix, title = "Bias Factor (Observed/
   terra::lines(grat, col = "grey70", lwd = 0.5)
   
   # Overlay shapes
-  terra::plot(basin_shp, col = NA, border = "black", lwd = 1.5, add = TRUE)
-  terra::plot(ne_ny_shp, col = NA, border = "grey40", lwd = 1.5, add = TRUE)
+  terra::plot(basin_shp, col = NA, border = "black", lwd = 0.5, add = TRUE)
+  terra::plot(ne_ny_shp, col = NA, border = "grey70", lwd = 1.5, add = TRUE)
   
   # Return invisibly
   invisible(r)
