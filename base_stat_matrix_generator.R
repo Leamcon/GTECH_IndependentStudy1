@@ -1,3 +1,0 @@
-library(terra)
-
-b
