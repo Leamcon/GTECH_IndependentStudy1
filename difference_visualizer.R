@@ -56,7 +56,7 @@ difference_visualizer <- function(input_matrix, title = "Difference (Observed - 
     crs = "EPSG:4326"
   )
   
-  # Range for bias factor
+  # Range for difference
   range_vals <- c(-0.9, 1.3)
   
   # Calculate where zero falls in the range (as a proportion)

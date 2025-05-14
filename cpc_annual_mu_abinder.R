@@ -56,6 +56,8 @@ cpc_precipitation_aggregator <- function(nc_file_path) {
   
   annual_means <- apply(filtered_precip, c(1, 2), my_agg)
   
+  # apply often changes the ordering of axes
+  # I use aperm to change them back to lon, lat, time 
   annual_means <- aperm(annual_means, c(2, 3, 1))
   
   # create names for array dims

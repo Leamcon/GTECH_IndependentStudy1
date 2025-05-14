@@ -56,15 +56,25 @@ bias_factor_visualizer <- function(input_matrix, title = "Bias Factor (Observed/
     crs = "EPSG:4326"
   )
   
+  # create diverging color palette centered on 1
+  range_vals <- c(0, 9)
+  n_colors <- 100
+  n_below_colors <- 10
+  n_above_colors <- n_colors - n_below_colors
+  
+  below_colors <- colorRampPalette(c("red", "white"))(n_below_colors)
+  above_colors <- colorRampPalette(c("white", "blue"))(n_above_colors + 1)[-1]
+  pal <- c(below_colors, above_colors)
+  
   # Plot with appropriate scale
   terra::plot(r, 
               main = title,
-              col = rev(hcl.colors(100, "Blues")),
+              col = pal,
               xlab = "Longitude",
               ylab = "Latitude",
               legend = TRUE,
               axes = TRUE,
-              range = c(0, 9))
+              range = range_vals)
   
   # Add graticule
   terra::lines(grat, col = "grey70", lwd = 0.5)
