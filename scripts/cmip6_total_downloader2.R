@@ -1,14 +1,14 @@
 # updated CMIP6 download script
-# designed to pull data from all models in the TDS CMIP6 repo
-# uses a predefined .shp as aoi
-# leverages the mt climate office cmip6 package
-# found at https://github.com/mt-climate-office/cmip6
+#   - designed to pull data from all models in the TDS CMIP6 repo
+#   - uses a predefined .shp as aoi
+#   - leverages the mt climate office cmip6 package
+#   - found at https://github.com/mt-climate-office/cmip6
 
 library(cmip6)
 library(sf)
 
 # calls my date continuity checker function
-source("gcm_date_continuity_checker_2.r")
+source("scripts/gcm_date_continuity_checker_2.r")
 
 # model lookup vector
 models <- c(
@@ -46,11 +46,11 @@ prompt_continue <- function() {
 }
 
 # downloader function takes a model name, scenario name, and aoi sf as input
-# nested loops
-#  - first loops through model vector
-#  - second loops through scenario
-# uses model and scenario names to create dirs if none are found in the output dir
-# includes user prompting
+#   - nested loops
+#     - first loops through model vector
+#     - second loops through scenario
+#   - uses model and scenario names to create dirs if none are found in the output dir
+#   - includes user prompting
 downloader <- function(models, scenarios, area_of_interest) {
   for (model in models) {
     for (scenario in scenarios) {

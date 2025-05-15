@@ -1,15 +1,15 @@
+# Difference Visualizer
+#   - implements a function to visualize difference matrices
+#   - uses a diverging color scheme to highlight positive and negative differences
+#   - accepts optional fixed min/max range parameters to maintain visual consistency
+#   - provides option to force color scale symmetry around zero
+#   - returns the plot object invisibly for potential further manipulation
+
 library(terra)
 
-#' Difference Visualizer
-#' 
-#' @description Visualizes difference matrices using a diverging color scheme
-#' @param input_matrix Matrix to visualize
-#' @param title Plot title
-#' @param symmetric Whether to force color scale to be symmetric around zero
-#' @return The plot object (invisibly)
-difference_visualizer <- function(input_matrix, title = "Difference (Observed - Model)"){
+difference_visualizer <- function(input_matrix, title = "Difference (Observed - Model)", min_max_range = NULL, symmetric = FALSE){
   
-  # Extract dimension names
+  # Extract dim names
   dims <- dimnames(input_matrix)
   lon_values <- as.numeric(dims[[1]])
   lat_values <- as.numeric(dims[[2]])
@@ -56,8 +56,12 @@ difference_visualizer <- function(input_matrix, title = "Difference (Observed - 
     crs = "EPSG:4326"
   )
   
-  # Range for difference
-  range_vals <- c(-0.9, 1.3)
+  # Use provided min/max range or calculate from data
+  if (is.null(min_max_range)) {
+    range_vals <- c(-0.9, 1.3)
+  } else {
+    range_vals <- min_max_range
+  }
   
   # Calculate where zero falls in the range (as a proportion)
   zero_position <- abs(range_vals[1]) / (abs(range_vals[1]) + abs(range_vals[2]))
@@ -66,8 +70,6 @@ difference_visualizer <- function(input_matrix, title = "Difference (Observed - 
   n_colors <- 100
   n_neg_colors <- round(zero_position * n_colors)
   n_pos_colors <- n_colors - n_neg_colors
-  
-  # Create the diverging palette with white at zero
   neg_colors <- colorRampPalette(c("red", "white"))(n_neg_colors)
   pos_colors <- colorRampPalette(c("white", "blue"))(n_pos_colors + 1)[-1]  # Remove first to avoid duplicate white
   pal <- c(neg_colors, pos_colors)
@@ -82,13 +84,10 @@ difference_visualizer <- function(input_matrix, title = "Difference (Observed - 
               axes = TRUE,
               range = range_vals)
   
-  # Add graticule
   terra::lines(grat, col = "grey70", lwd = 0.5)
   
-  # Overlay shapes
   terra::plot(basin_shp, col = NA, border = "black", lwd = 0.5, add = TRUE)
   terra::plot(ne_ny_shp, col = NA, border = "grey70", lwd = 1.5, add = TRUE)
   
-  # Return invisibly
   invisible(r)
 }

@@ -14,9 +14,9 @@ library(jpeg)
 duration <- 10
 
 # visualizers
-source("rm_range_visualizer.R")
-source("difference_visualizer.R")
-source("bias_factor_visualizer.R")
+source("scripts/visualizers/rm_range_visualizer.R")
+source("scripts/visualizers/difference_visualizer.R")
+source("scripts/visualizers/bias_factor_visualizer.R")
 
 #################
 # FUNCTIONS
@@ -92,8 +92,7 @@ running_mean_range_calculator <- function(ts_array, window) {
   # reset the dims after apply() usage
   running_mean_array <- aperm(running_mean_array, c(2, 3, 1))
   
-  # generate a matrix of range diffs across z axis at each x,y
-  # TODO: prevent creation of inf values - see frei_read_cpc_dat
+  # generate a matrix of range diffs across z axis at each x,y with na/inf handling
   range_matrix <- apply(running_mean_array, c(1,2), function(rm_slice) {
     if(all(is.na(rm_slice))) {
       return(NA)
@@ -124,7 +123,7 @@ grid_arithmetic_calculator <- function(observed_grid, model_grid) {
 #   - takes the list of matrices as input
 #   - iterates through the list and creates 4 panel plots with inset histograms
 create_model_plots_with_histograms <- function(results) {
-  # Create a vector of model names using grepl to get unique names
+
   model_keys <- names(results)[grepl("_rm_range$", names(results)) & !grepl("^observed", names(results))]
   model_names <- gsub("_historical_rm_range$", "", model_keys) # gets only unique model names
   
@@ -168,10 +167,8 @@ create_model_plots_with_histograms <- function(results) {
       tick_labels <- c("0", "2", "4", "6", "8")
     }
     
-    # allows for overlapping plot drawing
     par(xpd = TRUE)
     
-    # get the plot coords so drawing/position can be semi-automated
     usr <- par("usr")
     
     # position relative to the plot height
@@ -205,23 +202,21 @@ create_model_plots_with_histograms <- function(results) {
       )
     }
     
-    # Reset xpd to default
+
     par(xpd = FALSE)
   }
   
   # Process each model
   for (model_name in model_names) {
-    # Extract the data for each plot
+
     observed_data <- results$observed_rm_range
     model_rm_data <- results[[paste0(model_name, "_historical_rm_range")]]
     difference_data <- results[[paste0(model_name, "_historical_difference")]]
     bias_factor_data <- results[[paste0(model_name, "_historical_bias_factor")]]
     
-    # Set up the output file
     output_filename <- paste0("figures/final_running_mean_figures/", model_name, "_rm_range_diff_and_bias_with_hist.jpg")
     jpeg(output_filename, width = 10, height = 8, units = "in", res = 300)
     
-    # Generate a plot title
     plot_title <- toupper(paste(strsplit(model_name, "_")[[1]], collapse = " "))
     
     # Helper function to position a grid plot in its quadrant
@@ -296,7 +291,6 @@ create_model_plots_with_histograms <- function(results) {
          breaks = 20,
          axes = FALSE)
     
-    # Add custom x-axis with text and segments
     create_custom_histogram_axis(rm_range_min, rm_range_max, plot_type = "rm_range")
     
     # 2. Model RM Range grid (Quadrant 2: Top-right)
@@ -320,7 +314,7 @@ create_model_plots_with_histograms <- function(results) {
          border = "black",
          xlim = c(rm_range_min, rm_range_max),
          breaks = 20,
-         axes = FALSE)  # No axes
+         axes = FALSE)
     
     # Add custom x-axis with text and segments
     create_custom_histogram_axis(rm_range_min, rm_range_max, plot_type = "rm_range")
@@ -334,7 +328,7 @@ create_model_plots_with_histograms <- function(results) {
     
     # Add inset histogram for difference data
     diff_flat <- as.vector(difference_data)
-    diff_flat <- diff_flat[!is.na(diff_flat)]  # Remove NA values
+    diff_flat <- diff_flat[!is.na(diff_flat)]
     position_histogram_inset(3)
     
     hist(diff_flat, 
@@ -345,9 +339,8 @@ create_model_plots_with_histograms <- function(results) {
          border = "black",
          xlim = c(diff_min, diff_max),
          breaks = 20,
-         axes = FALSE)  # No axes
+         axes = FALSE)
     
-    # Add custom x-axis with text and segments
     create_custom_histogram_axis(diff_min, diff_max, plot_type = "difference")
     
     # 4. Bias factor grid (Quadrant 4: Bottom-right)
@@ -359,7 +352,7 @@ create_model_plots_with_histograms <- function(results) {
     
     # Add inset histogram for bias factor data
     bias_flat <- as.vector(bias_factor_data)
-    bias_flat <- bias_flat[!is.na(bias_flat)]  # Remove NA values
+    bias_flat <- bias_flat[!is.na(bias_flat)]
     position_histogram_inset(4)
     
     hist(bias_flat, 
@@ -370,18 +363,16 @@ create_model_plots_with_histograms <- function(results) {
          border = "black",
          xlim = c(bias_min, bias_max),
          breaks = 20,
-         axes = FALSE)  # No axes
+         axes = FALSE)
     
-    # Add custom x-axis with text and segments
     create_custom_histogram_axis(bias_min, bias_max, plot_type = "bias")
     
-    # Clean up and save
     dev.off()
     cat("Saved visualization for", model_name, "to", output_filename, "\n")
   }
 }
 
-
+#################
 # MAIN EXECUTION
 
 load("rdata/cpc_ne_annual_mean_precipitation.RData")
@@ -390,7 +381,6 @@ rm_derived_matrices <- cmip6_loader_processor(cpc_annual_means_ne_subset, durati
 
 create_model_plots_with_histograms(rm_derived_matrices)
 
-# save the list to rdata for use in final plotting function
 save(rm_derived_matrices, file = "rdata/rm_derived_matrices_list.RData")
 
 #################

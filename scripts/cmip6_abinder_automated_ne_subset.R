@@ -7,7 +7,7 @@ library(terra)
 library(tmap)
 
 # load the array visualization script
-source("multi_use_visualizer.R")
+source("scripts/visualizers/multi_use_visualizer.R")
 
 #################
 # FUNCTIONS

@@ -6,12 +6,16 @@ library(abind)
 library(ggplot2)
 library(sf)
 
+# uncomment if needed for testing
 #source("multi_use_visualizer.R")
 
-# function to aggregate monthly to annual means from a single .nc
-# creates an index of year values and month values
-# uses these as pointers to collect desired time frame and aggregate 12 month sections
-# binds a new 3D array of annual means
+##################################
+# FUNCTIONS
+
+# Function to aggregate monthly to annual means from a single .nc
+#   - creates an index of year values and month values
+#   - uses these as pointers to collect desired time frame and aggregate 12 month sections
+#   - binds a new 3D array of annual means
 cpc_precipitation_aggregator <- function(nc_file_path) {
   
   nc <- ncdf4::nc_open(nc_file_path)
@@ -81,10 +85,13 @@ cpc_precipitation_aggregator <- function(nc_file_path) {
   
 }
 
+######################################
+# MAIN EXECUTION
+
 cpc_annual_means_ne_subset <- cpc_precipitation_aggregator("data/cpc_conus_precip/precip_mon_mean_ne_shp_subset.nc")
 
+# uncomment for validation
 #multi_use_visualizer(cpc_annual_means_ne_subset, 45)
-
-image(cpc_annual_means_ne_subset[,,45])
+#image(cpc_annual_means_ne_subset[,,45])
 
 save(cpc_annual_means_ne_subset, file = "rdata/cpc_ne_annual_mean_precipitation.RData")

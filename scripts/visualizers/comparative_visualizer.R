@@ -1,6 +1,6 @@
 # Visualization function that can handle viz of various grid types
-# takes input grid and title, outputs plotted grid with reference vectors overlaid
-# Added min_val and max_val parameters to control legend range
+#   - takes input grid and title, outputs plotted grid with reference vectors overlaid
+#   - Added min_val and max_val parameters to control legend range
 
 library(terra)
 

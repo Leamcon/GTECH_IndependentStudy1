@@ -1,15 +1,15 @@
+# Running Mean Range Visualizer
+#   - implements a function to visualize running mean range matrices
+#   - ensures consistent color scales across multiple visualizations
+#   - accepts optional fixed min/max range parameters to maintain visual consistency
+#   - returns the plot object invisibly for potential further manipulation
+#   - designed for comparing observed and model-predicted precipitation variability
+
 library(terra)
 
-#' Bias Factor Visualizer
-#' 
-#' @description Visualizes bias factor matrices using a diverging color scheme
-#' @param input_matrix Matrix to visualize
-#' @param title Plot title
-#' @param log_scale Whether to use log scale for bias factor (recommended)
-#' @return The plot object (invisibly)
-bias_factor_visualizer <- function(input_matrix, title = "Bias Factor (Observed/Model)"){
+rm_range_visualizer <- function(input_matrix, title = "Running Mean Range", min_max_range = NULL){
   
-  # Extract dimension names
+  # extract dims
   dims <- dimnames(input_matrix)
   lon_values <- as.numeric(dims[[1]])
   lat_values <- as.numeric(dims[[2]])
@@ -56,33 +56,34 @@ bias_factor_visualizer <- function(input_matrix, title = "Bias Factor (Observed/
     crs = "EPSG:4326"
   )
   
-  # create diverging color palette centered on 1
-  range_vals <- c(0, 9)
-  n_colors <- 100
-  n_below_colors <- 10
-  n_above_colors <- n_colors - n_below_colors
+  # Use provided min/max range or calculate from data
+  if (is.null(min_max_range)) {
+    min_val <- min(input_matrix, na.rm = TRUE)
+    max_val <- max(input_matrix, na.rm = TRUE)
+    
+    range_buffer <- (max_val - min_val) * 0.001
+    
+    min_val <- min_val - range_buffer
+    max_val <- max_val + range_buffer
+  } else {
+    min_val <- min_max_range[1]
+    max_val <- min_max_range[2]
+  }
   
-  below_colors <- colorRampPalette(c("red", "white"))(n_below_colors)
-  above_colors <- colorRampPalette(c("white", "blue"))(n_above_colors + 1)[-1]
-  pal <- c(below_colors, above_colors)
-  
-  # Plot with appropriate scale
   terra::plot(r, 
               main = title,
-              col = pal,
+              col = rev(hcl.colors(100, "Blues")),
               xlab = "Longitude",
               ylab = "Latitude",
               legend = TRUE,
+              plg = list(title = "mm/day"),
               axes = TRUE,
-              range = range_vals)
+              range = c(min_val, max_val))
   
-  # Add graticule
   terra::lines(grat, col = "grey70", lwd = 0.5)
   
-  # Overlay shapes
   terra::plot(basin_shp, col = NA, border = "black", lwd = 0.5, add = TRUE)
   terra::plot(ne_ny_shp, col = NA, border = "grey70", lwd = 1.5, add = TRUE)
   
-  # Return invisibly
   invisible(r)
 }
