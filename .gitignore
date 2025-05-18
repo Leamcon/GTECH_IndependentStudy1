@@ -32,10 +32,10 @@
 /outbox/
 
 # specific negations (for final)
-!/figures/final_mean_precipitation_figures/
-!/figures/final_running_mean_figures/
-!/figures/mean_precipitation_summary_stats
-!/figures/rm_range_summary_stats_figures
+!/figures/final_mean_precipitation_figures/*.jpg
+!/figures/final_running_mean_figures/*.jpg
+!/figures/mean_precipitation_summary_stats/*.jpg
+!/figures/rm_range_summary_stats_figures/*.jpg
 
 !/data/bounds
 !/rdata/*.Rdata
