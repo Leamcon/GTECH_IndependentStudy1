@@ -23,6 +23,7 @@
 *.shp.xml
 *.shx
 *.doc
+*.cpg
 
 # Output
 *.pdf
@@ -45,6 +46,7 @@
 !/data/bounds/*.shp.xml
 !/data/bounds/*.shx
 !/data/bounds/*.doc
+!/data/bounds/*.cpg
 
 !/rdata/*.Rdata
 /rdata/rdata_archive
