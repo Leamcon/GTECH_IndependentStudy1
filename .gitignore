@@ -23,16 +23,23 @@
 *.shp.xml
 *.shx
 *.doc
-# (you might want to track smaller data files)
 
 # Output
 *.pdf
 *.png
 *.jpg
-figures/
-output/
-data/
-rdata/
+
+/outbox/
+
+# specific negations (for final)
+!/figures/final_mean_precipitation_figures/
+!/figures/final_running_mean_figures/
+!/figures/mean_precipitation_summary_stats
+!/figures/rm_range_summary_stats_figures
+
+!/data/bounds
+!/rdata/*.Rdata
+/rdata/rdata_archive
 
 # Dr. Frei's Work
 frei_catskills_validation_methods/
