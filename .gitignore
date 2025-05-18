@@ -37,7 +37,15 @@
 !/figures/mean_precipitation_summary_stats/*.jpg
 !/figures/rm_range_summary_stats_figures/*.jpg
 
-!/data/bounds
+!/data/bounds/*.dbf
+!/data/bounds/*.prj
+!/data/bounds/*.sbn
+!/data/bounds/*.sbx
+!/data/bounds/*.shp
+!/data/bounds/*.shp.xml
+!/data/bounds/*.shx
+!/data/bounds/*.doc
+
 !/rdata/*.Rdata
 /rdata/rdata_archive
 
