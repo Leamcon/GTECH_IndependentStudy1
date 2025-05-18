@@ -1,0 +1,81 @@
+1/04: This feature dataset was imported from the coverage library for initial implementation of the geodatabase.  In several instances, two or more coverages (similar features but differing geographic regions) were combined to create the feature dataset.  This metadata includes the original ascii text from the coverage library documentation, updated and revised where necessary to explain the processing required for geodatabase import.  This metadata will be reformatted for FGDC compliance when time and resources allow.  
+
+
+COVERAGE NAME:		basin24
+GEOGRAPHICAL EXTENT:	eoh & woh
+PROJECTION:		  	utm
+MAP UNITS:			meters
+DATUM:			NAD83 (projected from NAD27 by DEP staff, July 2002)
+TYPE OF COVERAGE:		polygon
+CURRENT VERSION #:	2
+CURRENT VERSION CREATION DATE:	June, 2000
+CURRENT VERSION CREATED BY:	Yuri Gorokhovich / NYC-DEP
+
+***********
+VERSION #:		1
+CREATION DATE:	Aug22,1995
+CREATED BY:		Greg Marsh
+
+DESCRIPTION:	Reservoir drainage basins for entire NYC watershed.
+
+SOURCE OF INFORMATION:	Pre-existing datasets: basin24eoh2 & basin24woh
+
+METHOD OF PREPARATION:	ARC command MAPJOIN, using above sources as inputs.
+
+DATABASE ITEM DICTIONARY:
+
+ITEM NAME: basin
+DESCRIPTION: Basin polygon's corresponding reservoir.
+
+
+CAVEATS AND COMMENTS:
+
+***********
+VERSION #:      2
+CREATION DATE:  June, 2000
+CREATED BY:     Yuri Gorokhovich
+
+DESCRIPTION:    Reservoir drainage basins for entire NYC watershed.
+
+SOURCE OF INFORMATION:  Pre-existing datasets: basin24eoh2 & basin24woh
+
+METHOD OF PREPARATION:  ARC command MAPJOIN, using above sources as inputs.
+
+DATABASE ITEM DICTIONARY:
+
+ITEM NAME: basin 
+DESCRIPTION: Basin polygon's corresponding reservoir.
+
+
+CAVEATS AND COMMENTS: "basin24eoh" was edit (boundary between Croton and
+Muscoot basins), see basin24eoh4.doc for further info.
+
+***********
+
+VERSION #:      3
+CREATION DATE:  1.28.03
+CREATED BY:     D. Lounsbury
+
+DESCRIPTION: Version 3 created by appending basin24eoh5 and basin24woh3.  Version 2 had been created using basin24eoh4 and did not accurately reflect the boundary between the Croton and Muscoot basins.
+
+************
+
+
+FOR FURTHER INFORMATION, CONTACT:
+
+Terry Spies, GIS Coordinator
+NYCDEP Division of Watershed Lands and Community Planning
+71 Smith Avenue
+Kingston, NY 12401
+(845) 340-7527
+tspies@dep.nyc.gov
+
+
+David Lounsbury, GIS Specialist, Mapping and Modeling Unit
+NYCDEP Division of Drinking Water Quality Control
+71 Smith Avenue
+Kingston, NY 12401
+(845) 340-7570
+dlounsbury@dep.nyc.gov
+
+
